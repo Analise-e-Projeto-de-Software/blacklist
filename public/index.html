@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de E-mails Suspeitos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f4e4;
+            border: 1px solid #d4e4d1;
+            color: #333;
+        }
+        .error {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f4e4e4;
+            border: 1px solid #e4d4d4;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Análise de E-mails Suspeitos</h1>
+        <form id="emailForm">
+            <label for="emailContent">Cabeçalhos e Conteúdo do E-mail:</label><br>
+            <textarea id="emailContent" rows="20" style="width: 100%;"></textarea><br>
+            <button type="submit">Analisar</button>
+        </form>
+        <div id="result" class="result" style="display:none;"></div>
+        <div id="error" class="error" style="display:none;"></div>
+    </div>
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const emailContent = document.getElementById('emailContent').value;
+
+            fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mail: emailContent })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('result').innerHTML = `
+                    <h2>Resultado da Análise</h2>
+                    <p><strong>Headers:</strong> ${JSON.stringify(data.headers)}</p>
+                    <p><strong>Conteúdo Suspeito:</strong> ${data.suspiciousContent ? 'Sim' : 'Não'}</p>
+                `;
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById('result').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').innerHTML = `
+                    <h2>Erro</h2>
+                    <p>Ocorreu um erro ao analisar o e-mail.</p>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
