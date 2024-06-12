@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database/blacklist.db');
+const checkURL = require('../middleware/urlChecker');
 
 // Rota raiz para servir o arquivo HTML
 router.get('/', (req, res) => {
@@ -24,15 +25,18 @@ router.post('/analyze-email', (req, res) => {
     });
 });
 
+// Endpoint para verificar URL
+router.get('/check-url', checkURL, (req, res) => {
+    res.json({ message: 'URL segura.' });
+});
+
 function analyzeEmail(email, header, body) {
-    // Verificar se o domínio do email é suspeito
     const suspiciousDomains = ['suspicious.com', 'malicious.org'];
     const emailDomain = email.split('@')[1];
     if (suspiciousDomains.includes(emailDomain)) {
         return 1;
     }
 
-    // Verificar palavras-chave suspeitas no corpo do email
     const suspiciousKeywords = ['prêmio', 'ganhou', 'clique aqui'];
     for (const keyword of suspiciousKeywords) {
         if (body.includes(keyword)) {
@@ -40,7 +44,6 @@ function analyzeEmail(email, header, body) {
         }
     }
 
-    // Verificar se o header contém informações suspeitas
     const suspiciousHeaderIndicators = ['X-Spam', 'X-Malicious'];
     for (const indicator of suspiciousHeaderIndicators) {
         if (header.includes(indicator)) {
@@ -48,7 +51,6 @@ function analyzeEmail(email, header, body) {
         }
     }
 
-    // Se passar por todas as verificações, não é suspeito
     return 0;
 }
 

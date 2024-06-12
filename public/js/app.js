@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('emailForm');
-    form.addEventListener('submit', async (e) => {
+    const emailForm = document.getElementById('emailForm');
+    emailForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const email = document.getElementById('email').value;
@@ -15,5 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const result = await response.json();
         alert(`Email ${result.isSuspicious ? 'suspeito' : 'seguro'}.`);
+    });
+
+    const urlForm = document.getElementById('urlForm');
+    urlForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const url = document.getElementById('url').value;
+
+        const response = await fetch(`/check-url?url=${encodeURIComponent(url)}`);
+        const result = await response.json();
+        alert(result.message);
     });
 });
