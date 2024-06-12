@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const indexRouter = require('./src/routes/index');
+const { router: indexRouter } = require('./src/routes/index');
 
 const app = express();
 const port = process.env.PORT || 3000;

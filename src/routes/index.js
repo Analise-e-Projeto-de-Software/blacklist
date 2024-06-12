@@ -14,7 +14,7 @@ router.post('/analyze-email', (req, res) => {
     const { email, header, body } = req.body;
 
     // Lógica de análise do e-mail
-    const isSuspicious = analyzeEmail(header, body);
+    const isSuspicious = analyzeEmail(email, header, body);
 
     db.run(`INSERT INTO emails (email, header, body, is_suspicious) VALUES (?, ?, ?, ?)`, [email, header, body, isSuspicious], function(err) {
         if (err) {
@@ -24,10 +24,32 @@ router.post('/analyze-email', (req, res) => {
     });
 });
 
-function analyzeEmail(header, body) {
-    // Implementar lógica de análise
-    // Retornar 1 se suspeito, 0 caso contrário
-    return Math.random() > 0.5 ? 1 : 0; // Exemplo simples
+function analyzeEmail(email, header, body) {
+    // Verificar se o domínio do email é suspeito
+    const suspiciousDomains = ['suspicious.com', 'malicious.org'];
+    const emailDomain = email.split('@')[1];
+    if (suspiciousDomains.includes(emailDomain)) {
+        return 1;
+    }
+
+    // Verificar palavras-chave suspeitas no corpo do email
+    const suspiciousKeywords = ['prêmio', 'ganhou', 'clique aqui'];
+    for (const keyword of suspiciousKeywords) {
+        if (body.includes(keyword)) {
+            return 1;
+        }
+    }
+
+    // Verificar se o header contém informações suspeitas
+    const suspiciousHeaderIndicators = ['X-Spam', 'X-Malicious'];
+    for (const indicator of suspiciousHeaderIndicators) {
+        if (header.includes(indicator)) {
+            return 1;
+        }
+    }
+
+    // Se passar por todas as verificações, não é suspeito
+    return 0;
 }
 
-module.exports = router;
+module.exports = { router, analyzeEmail };
