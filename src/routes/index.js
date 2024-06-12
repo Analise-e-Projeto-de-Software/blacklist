@@ -4,6 +4,7 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const checkURL = require('../middleware/urlChecker');
 const { verifyNews } = require('../services/newsService');
+const { logActivity } = require('../services/logService');
 
 const db = new sqlite3.Database('./database/blacklist.db');
 
@@ -23,12 +24,15 @@ router.post('/analyze-email', (req, res) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
+        // Registrar log de atividade
+        logActivity(`Email analisado: ${email} - Suspeito: ${isSuspicious}`);
         res.json({ id: this.lastID, isSuspicious });
     });
 });
 
 // Endpoint para verificar URL
 router.get('/check-url', checkURL, (req, res) => {
+    logActivity(`URL verificada: ${req.query.url}`);
     res.json({ message: 'URL segura.' });
 });
 
@@ -38,10 +42,21 @@ router.get('/verify-news', async (req, res) => {
 
     try {
         const newsData = await verifyNews(query);
+        logActivity(`Notícia verificada: ${query}`);
         res.json(newsData);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+});
+
+// Endpoint para visualizar logs
+router.get('/logs', (req, res) => {
+    db.all(`SELECT * FROM logs ORDER BY timestamp DESC`, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
 });
 
 function analyzeEmail(email, header, body) {

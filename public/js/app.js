@@ -39,4 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(result);
         alert(`Encontrado ${result.totalResults} artigos relacionados.`);
     });
+
+    // Carregar logs de atividades
+    const loadLogsButton = document.getElementById('loadLogs');
+    loadLogsButton.addEventListener('click', async () => {
+        const response = await fetch('/logs');
+        const logs = await response.json();
+        const logsContainer = document.getElementById('logsContainer');
+        logsContainer.innerHTML = logs.map(log => `<p>${log.timestamp}: ${log.activity}</p>`).join('');
+    });
 });

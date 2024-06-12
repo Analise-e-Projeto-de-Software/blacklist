@@ -9,7 +9,12 @@ db.serialize(() => {
         body TEXT,
         is_suspicious INTEGER DEFAULT 0
     )`);
-    // Adicione mais tabelas conforme necessário
+
+    db.run(`CREATE TABLE IF NOT EXISTS logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity TEXT NOT NULL,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
 });
 
 db.close();
