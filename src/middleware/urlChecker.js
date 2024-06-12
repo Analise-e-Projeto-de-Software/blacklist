@@ -11,7 +11,23 @@ async function checkURL(req, res, next) {
     const queryObject = url.parse(req.url, true).query;
     if (queryObject.url) {
         const parsedUrl = url.parse(queryObject.url);
-        
+
+        // Verificar se a URL encurtada redireciona para um domínio suspeito
+        if (parsedUrl.hostname.match(/bit\.ly|goo\.gl|t\.co/)) {
+            try {
+                const response = await fetch(queryObject.url, { method: 'HEAD', redirect: 'manual' });
+                const finalUrl = response.headers.get('location');
+                if (finalUrl) {
+                    const finalParsedUrl = url.parse(finalUrl);
+                    if (suspiciousDomains.includes(finalParsedUrl.hostname)) {
+                        return res.status(400).json({ message: 'URL suspeita detectada: redireciona para um domínio suspeito.' });
+                    }
+                }
+            } catch (error) {
+                return res.status(500).json({ message: 'Erro ao verificar redirecionamento de URL encurtada.' });
+            }
+        }
+
         // Verificar se o domínio está na lista de suspeitos
         if (suspiciousDomains.includes(parsedUrl.hostname)) {
             return res.status(400).json({ message: 'URL suspeita detectada: domínio suspeito.' });
@@ -27,18 +43,6 @@ async function checkURL(req, res, next) {
         // Verificar se a URL utiliza HTTPS
         if (parsedUrl.protocol !== 'https:') {
             return res.status(400).json({ message: 'URL suspeita detectada: não utiliza HTTPS.' });
-        }
-
-        // Verificar se a URL encurtada redireciona para um domínio suspeito
-        if (parsedUrl.hostname.match(/bit\.ly|goo\.gl|t\.co/)) {
-            const response = await fetch(queryObject.url, { method: 'HEAD', redirect: 'manual' });
-            const finalUrl = response.headers.get('location');
-            if (finalUrl) {
-                const finalParsedUrl = url.parse(finalUrl);
-                if (suspiciousDomains.includes(finalParsedUrl.hostname)) {
-                    return res.status(400).json({ message: 'URL suspeita detectada: redireciona para um domínio suspeito.' });
-                }
-            }
         }
     }
     next();
