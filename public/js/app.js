@@ -27,4 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await response.json();
         alert(result.message);
     });
+
+    const newsForm = document.getElementById('newsForm');
+    newsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const query = document.getElementById('query').value;
+
+        const response = await fetch(`/verify-news?query=${encodeURIComponent(query)}`);
+        const result = await response.json();
+        console.log(result);
+        alert(`Encontrado ${result.totalResults} artigos relacionados.`);
+    });
 });

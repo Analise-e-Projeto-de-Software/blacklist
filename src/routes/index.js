@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./database/blacklist.db');
 const checkURL = require('../middleware/urlChecker');
+const { verifyNews } = require('../services/newsService');
+
+const db = new sqlite3.Database('./database/blacklist.db');
 
 // Rota raiz para servir o arquivo HTML
 router.get('/', (req, res) => {
@@ -28,6 +30,18 @@ router.post('/analyze-email', (req, res) => {
 // Endpoint para verificar URL
 router.get('/check-url', checkURL, (req, res) => {
     res.json({ message: 'URL segura.' });
+});
+
+// Endpoint para verificar credibilidade de notícias
+router.get('/verify-news', async (req, res) => {
+    const { query } = req.query;
+
+    try {
+        const newsData = await verifyNews(query);
+        res.json(newsData);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 function analyzeEmail(email, header, body) {
