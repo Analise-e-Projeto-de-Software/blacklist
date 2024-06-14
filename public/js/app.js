@@ -6,15 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('email').value;
         const header = document.getElementById('header').value;
         const body = document.getElementById('body').value;
-        
+
         const response = await fetch('/analyze-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, header, body })
         });
-        
+
         const result = await response.json();
-        alert(`Email ${result.isSuspicious ? 'suspeito' : 'seguro'}.`);
+        const reportContainer = document.getElementById('reportContainer');
+        reportContainer.innerHTML = `
+            <h3>Resultado da Análise</h3>
+            <p>Email: ${email}</p>
+            <p>Suspeito: ${result.isSuspicious ? 'Sim' : 'Não'}</p>
+            <h4>Detalhes</h4>
+            <pre>${result.details.join('\n')}</pre>
+        `;
     });
 
     const urlForm = document.getElementById('urlForm');
