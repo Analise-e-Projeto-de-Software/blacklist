@@ -2,35 +2,39 @@ const { expect } = require('chai');
 const { analyzeEmail } = require('../src/routes/index');
 
 describe('Email Analysis', () => {
-    it('should mark email as suspicious if the domain is in the suspicious list', () => {
-        const email = 'user@suspicious.com';
-        const header = '';
-        const body = '';
-        const result = analyzeEmail(email, header, body);
-        expect(result).to.equal(1);
+    it('should mark email as suspicious if the domain is in the suspicious list', async () => {
+        const result = await analyzeEmail('test@suspicious.com', '', '');
+        expect(result.isSuspicious).to.equal(1);
+        expect(result.details).to.include('Domínio do e-mail é suspeito');
     });
 
-    it('should mark email as suspicious if the body contains suspicious keywords', () => {
-        const email = 'user@example.com';
-        const header = '';
-        const body = 'Você ganhou um prêmio, clique aqui!';
-        const result = analyzeEmail(email, header, body);
-        expect(result).to.equal(1);
+    it('should mark email as suspicious if the body contains suspicious keywords', async () => {
+        const result = await analyzeEmail('test@example.com', '', 'Você ganhou um prêmio!');
+        expect(result.isSuspicious).to.equal(1);
+        expect(result.details).to.include('O corpo do e-mail contém uma palavra-chave suspeita: "prêmio"');
     });
 
-    it('should mark email as suspicious if the header contains suspicious indicators', () => {
-        const email = 'user@example.com';
-        const header = 'X-Spam: yes';
-        const body = '';
-        const result = analyzeEmail(email, header, body);
-        expect(result).to.equal(1);
+    it('should mark email as suspicious if the header contains suspicious indicators', async () => {
+        const result = await analyzeEmail('test@example.com', 'X-Spam: yes', '');
+        expect(result.isSuspicious).to.equal(1);
+        expect(result.details).to.include('O cabeçalho do e-mail contém um indicador suspeito: "X-Spam"');
     });
 
-    it('should not mark email as suspicious if it passes all checks', () => {
-        const email = 'user@example.com';
-        const header = '';
-        const body = 'Olá, como você está?';
-        const result = analyzeEmail(email, header, body);
-        expect(result).to.equal(0);
+    it('should mark email as suspicious if the body contains a non-HTTPS link', async () => {
+        const result = await analyzeEmail('test@example.com', '', 'Clique aqui: http://example.com');
+        expect(result.isSuspicious).to.equal(1);
+        expect(result.details).to.include('O corpo do e-mail contém um link que não usa HTTPS');
+    });
+
+    it('should mark email as suspicious if it contains suspicious attachments', async () => {
+        const result = await analyzeEmail('test@example.com', '', '', ['malware.exe']);
+        expect(result.isSuspicious).to.equal(1);
+        expect(result.details).to.include('O e-mail contém um anexo suspeito: "malware.exe"');
+    });
+
+    it('should not mark email as suspicious if it passes all checks', async () => {
+        const result = await analyzeEmail('test@example.com', '', 'Mensagem segura', []);
+        expect(result.isSuspicious).to.equal(0);
+        expect(result.details).to.include('O e-mail parece seguro');
     });
 });

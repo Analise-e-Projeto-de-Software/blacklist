@@ -34,12 +34,13 @@ router.post('/analyze-email', async (req, res) => {
     });
 });
 
-async function analyzeEmail(email, header, body) {
+async function analyzeEmail(email, header, body, attachments = []) {
     const details = [];
     const suspiciousDomains = ['suspicious.com', 'malicious.org'];
     const emailDomain = email.split('@')[1];
     if (suspiciousDomains.includes(emailDomain)) {
         details.push('Domínio do e-mail é suspeito');
+        console.log('Domínio suspeito detectado:', details);
         return { isSuspicious: 1, details };
     }
 
@@ -47,6 +48,7 @@ async function analyzeEmail(email, header, body) {
     for (const keyword of suspiciousKeywords) {
         if (body.includes(keyword)) {
             details.push(`O corpo do e-mail contém uma palavra-chave suspeita: "${keyword}"`);
+            console.log('Palavra-chave suspeita detectada:', details);
             return { isSuspicious: 1, details };
         }
     }
@@ -55,6 +57,7 @@ async function analyzeEmail(email, header, body) {
     for (const indicator of suspiciousHeaderIndicators) {
         if (header.includes(indicator)) {
             details.push(`O cabeçalho do e-mail contém um indicador suspeito: "${indicator}"`);
+            console.log('Indicador de cabeçalho suspeito detectado:', details);
             return { isSuspicious: 1, details };
         }
     }
@@ -64,27 +67,34 @@ async function analyzeEmail(email, header, body) {
     const urls = body.match(urlRegex) || [];
     for (const url of urls) {
         const urlDomain = new URL(url).hostname;
-        if (!await checkDomainReputation(urlDomain)) {
+        const isReputationSafe = await checkDomainReputation(urlDomain);
+        if (!isReputationSafe) {
             details.push(`O corpo do e-mail contém um link para um domínio suspeito: "${urlDomain}"`);
+            console.log('Link suspeito detectado:', details);
             return { isSuspicious: 1, details };
         }
+    }
+
+    for (const url of urls) {
         if (!url.startsWith('https')) {
             details.push('O corpo do e-mail contém um link que não usa HTTPS');
+            console.log('Link não HTTPS detectado:', details);
             return { isSuspicious: 1, details };
         }
     }
 
     // Nova regra: Verificar anexos (simulação)
     const suspiciousAttachments = ['.exe', '.bat', '.cmd'];
-    const attachments = []; // Precisamos de uma forma de extrair os anexos do e-mail
     for (const attachment of attachments) {
         if (suspiciousAttachments.some(ext => attachment.endsWith(ext))) {
             details.push(`O e-mail contém um anexo suspeito: "${attachment}"`);
+            console.log('Anexo suspeito detectado:', details);
             return { isSuspicious: 1, details };
         }
     }
 
     details.push('O e-mail parece seguro');
+    console.log('E-mail seguro:', details);
     return { isSuspicious: 0, details };
 }
 
