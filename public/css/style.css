@@ -1,96 +1,111 @@
+/* Define o estilo básico do corpo da página */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-    text-align: center;
-    padding: 50px;
+    font-family: Arial, sans-serif; /* Define a fonte padrão */
+    background-color: #f4f4f4; /* Define a cor de fundo */
+    color: #333; /* Define a cor do texto */
+    text-align: center; /* Centraliza o texto */
+    padding: 50px; /* Adiciona espaçamento ao redor do conteúdo */
 }
 
+/* Estilo para os títulos h1 e h2 */
 h1, h2 {
-    color: #444;
+    color: #444; /* Define a cor do texto dos títulos */
 }
 
+/* Estilo para os formulários */
 form {
-    margin: 20px 0;
-    padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: inline-block;
-    text-align: left;
+    margin: 20px 0; /* Adiciona margem acima e abaixo do formulário */
+    padding: 20px; /* Adiciona espaçamento interno */
+    background-color: #fff; /* Define a cor de fundo do formulário */
+    border: 1px solid #ccc; /* Define a cor e estilo da borda */
+    border-radius: 10px; /* Arredonda os cantos */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Adiciona sombra ao formulário */
+    display: inline-block; /* Exibe o formulário como bloco inline */
+    text-align: left; /* Alinha o texto à esquerda */
 }
 
+/* Estilo para os rótulos (labels) */
 label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
+    display: block; /* Exibe o rótulo como bloco */
+    margin-bottom: 8px; /* Adiciona margem abaixo do rótulo */
+    font-weight: bold; /* Define o texto em negrito */
 }
 
+/* Estilo para os campos de texto e áreas de texto */
 input[type="text"], textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
+    width: 100%; /* Define a largura para 100% do contêiner */
+    padding: 10px; /* Adiciona espaçamento interno */
+    margin-bottom: 10px; /* Adiciona margem abaixo */
+    border: 1px solid #ccc; /* Define a cor e estilo da borda */
+    border-radius: 5px; /* Arredonda os cantos */
+    box-sizing: border-box; /* Inclui o padding e a borda no tamanho total do elemento */
 }
 
+/* Estilo para os botões */
 button {
-    padding: 10px 20px;
-    background-color: #007BFF;
-    border: none;
-    border-radius: 5px;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
+    padding: 10px 20px; /* Adiciona espaçamento interno */
+    background-color: #007BFF; /* Define a cor de fundo */
+    border: none; /* Remove a borda */
+    border-radius: 5px; /* Arredonda os cantos */
+    color: #fff; /* Define a cor do texto */
+    font-size: 16px; /* Define o tamanho da fonte */
+    cursor: pointer; /* Altera o cursor ao passar sobre o botão */
 }
 
+/* Estilo para os botões ao passar o mouse sobre eles */
 button:hover {
-    background-color: #0056b3;
+    background-color: #0056b3; /* Altera a cor de fundo ao passar o mouse */
 }
 
+/* Estilo para os contêineres de resultados e logs */
 #reportContainer, #newsContainer, #logsContainer {
-    margin-top: 20px;
-    text-align: left;
+    margin-top: 20px; /* Adiciona margem acima */
+    text-align: left; /* Alinha o texto à esquerda */
 }
 
+/* Estilo para o elemento pre */
 pre {
-    background-color: #eee;
-    padding: 10px;
-    border-radius: 5px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    background-color: #eee; /* Define a cor de fundo */
+    padding: 10px; /* Adiciona espaçamento interno */
+    border-radius: 5px; /* Arredonda os cantos */
+    white-space: pre-wrap; /* Permite quebra de linha automática */
+    word-wrap: break-word; /* Quebra palavras longas */
 }
 
+/* Estilo para listas não ordenadas */
 ul {
-    list-style-type: none;
-    padding: 0;
+    list-style-type: none; /* Remove marcadores da lista */
+    padding: 0; /* Remove o padding padrão */
 }
 
+/* Estilo para itens da lista */
 li {
-    background-color: #fff;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff; /* Define a cor de fundo */
+    padding: 15px; /* Adiciona espaçamento interno */
+    margin-bottom: 10px; /* Adiciona margem abaixo */
+    border: 1px solid #ccc; /* Define a cor e estilo da borda */
+    border-radius: 5px; /* Arredonda os cantos */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Adiciona sombra aos itens */
 }
 
+/* Estilo para o título dentro dos itens da lista */
 li h4 {
-    margin-top: 0;
-    font-size: 18px;
+    margin-top: 0; /* Remove a margem superior */
+    font-size: 18px; /* Define o tamanho da fonte */
 }
 
+/* Estilo para os parágrafos dentro dos itens da lista */
 li p {
-    margin: 5px 0;
+    margin: 5px 0; /* Adiciona margem acima e abaixo */
 }
 
+/* Estilo para links */
 a {
-    color: #007BFF;
-    text-decoration: none;
+    color: #007BFF; /* Define a cor do link */
+    text-decoration: none; /* Remove a sublinhado */
 }
 
+/* Estilo para links ao passar o mouse */
 a:hover {
-    text-decoration: underline;
+    text-decoration: underline; /* Adiciona sublinhado ao passar o mouse */
 }

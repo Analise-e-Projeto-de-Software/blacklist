@@ -1,16 +1,19 @@
+// Importa os módulos necessários
 const express = require('express');
-const router = express.Router();
+const router = express.Router(); // Cria um roteador para gerenciar as rotas
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const axios = require('axios');
-require('dotenv').config();
+require('dotenv').config(); // Carrega as variáveis de ambiente do arquivo .env
 
+// Importa middleware e serviços
 const checkURL = require('../middleware/urlChecker');
 const { verifyNews } = require('../services/newsService');
 const { logActivity } = require('../services/logService');
 
+// Abre uma conexão com o banco de dados SQLite
 const db = new sqlite3.Database('./database/blacklist.db');
-const vtApiKey = process.env.VT_API_KEY;
+const vtApiKey = process.env.VT_API_KEY; // Obtém a chave da API VirusTotal das variáveis de ambiente
 
 // Rota raiz para servir o arquivo HTML
 router.get('/', (req, res) => {
@@ -24,7 +27,8 @@ router.post('/analyze-email', async (req, res) => {
     // Lógica de análise do e-mail
     const result = await analyzeEmail(email, header, body);
 
-    db.run(`INSERT INTO emails (email, header, body, is_suspicious) VALUES (?, ?, ?, ?)`, [email, header, body, result.isSuspicious], function(err) {
+    // Insere os resultados da análise no banco de dados
+    db.run(`INSERT INTO emails (email, header, body, is_suspicious) VALUES (?, ?, ?, ?)`, [email, header, body, result.isSuspicious], function (err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -62,16 +66,20 @@ router.get('/logs', (req, res) => {
     });
 });
 
+// Função para analisar o e-mail
 async function analyzeEmail(email, header, body, attachments = []) {
     const details = [];
     const suspiciousDomains = ['suspicious.com', 'malicious.org'];
     const emailDomain = email.split('@')[1];
+
+    // Verifica se o domínio do e-mail é suspeito
     if (suspiciousDomains.includes(emailDomain)) {
         details.push('Domínio do e-mail é suspeito');
         console.log('Domínio suspeito detectado:', details);
         return { isSuspicious: 1, details };
     }
 
+    // Verifica se o corpo do e-mail contém palavras-chave suspeitas
     const suspiciousKeywords = ['prêmio', 'ganhou', 'clique aqui'];
     for (const keyword of suspiciousKeywords) {
         if (body.includes(keyword)) {
@@ -81,6 +89,7 @@ async function analyzeEmail(email, header, body, attachments = []) {
         }
     }
 
+    // Verifica se o cabeçalho do e-mail contém indicadores suspeitos
     const suspiciousHeaderIndicators = ['X-Spam', 'X-Malicious'];
     for (const indicator of suspiciousHeaderIndicators) {
         if (header.includes(indicator)) {
@@ -90,7 +99,7 @@ async function analyzeEmail(email, header, body, attachments = []) {
         }
     }
 
-    // Nova regra: Verificar links no corpo do e-mail
+    // Verifica links no corpo do e-mail
     const urlRegex = /https?:\/\/[^\s/$.?#].[^\s]*/g;
     const urls = body.match(urlRegex) || [];
     for (const url of urls) {
@@ -103,6 +112,7 @@ async function analyzeEmail(email, header, body, attachments = []) {
         }
     }
 
+    // Verifica se os links usam HTTPS
     for (const url of urls) {
         if (!url.startsWith('https')) {
             details.push('O corpo do e-mail contém um link que não usa HTTPS');
@@ -111,7 +121,7 @@ async function analyzeEmail(email, header, body, attachments = []) {
         }
     }
 
-    // Nova regra: Verificar anexos (simulação)
+    // Verifica anexos (simulação)
     const suspiciousAttachments = ['.exe', '.bat', '.cmd'];
     for (const attachment of attachments) {
         if (suspiciousAttachments.some(ext => attachment.endsWith(ext))) {
@@ -126,6 +136,7 @@ async function analyzeEmail(email, header, body, attachments = []) {
     return { isSuspicious: 0, details };
 }
 
+// Função para verificar a reputação do domínio usando a API VirusTotal
 async function checkDomainReputation(domain) {
     try {
         const response = await axios.get(`https://www.virustotal.com/api/v3/domains/${domain}`, {
@@ -142,4 +153,5 @@ async function checkDomainReputation(domain) {
     }
 }
 
+// Exporta o roteador e a função analyzeEmail
 module.exports = { router, analyzeEmail };
