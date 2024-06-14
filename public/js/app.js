@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const response = await fetch(`/check-url?url=${encodeURIComponent(url)}`);
         const result = await response.json();
-        alert(result.message);
+        alert(result.message || result.error);
     });
 
     const newsForm = document.getElementById('newsForm');

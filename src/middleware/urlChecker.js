@@ -1,51 +1,36 @@
-const url = require('url');
-const fetch = require('node-fetch');
+const axios = require('axios');
+require('dotenv').config();
 
-// Lista de domínios suspeitos para exemplo
-const suspiciousDomains = ['phishing.com', 'malicious.org'];
+const vtApiKey = process.env.VT_API_KEY;
 
-// Lista de palavras-chave suspeitas em URLs
-const suspiciousKeywords = ['login', 'secure', 'account', 'update'];
-
-async function checkURL(req, res, next) {
-    const queryObject = url.parse(req.url, true).query;
-    if (queryObject.url) {
-        const parsedUrl = url.parse(queryObject.url);
-
-        // Verificar se a URL encurtada redireciona para um domínio suspeito
-        if (parsedUrl.hostname.match(/bit\.ly|goo\.gl|t\.co/)) {
-            try {
-                const response = await fetch(queryObject.url, { method: 'HEAD', redirect: 'manual' });
-                const finalUrl = response.headers.get('location');
-                if (finalUrl) {
-                    const finalParsedUrl = url.parse(finalUrl);
-                    if (suspiciousDomains.includes(finalParsedUrl.hostname)) {
-                        return res.status(400).json({ message: 'URL suspeita detectada: redireciona para um domínio suspeito.' });
-                    }
-                }
-            } catch (error) {
-                return res.status(500).json({ message: 'Erro ao verificar redirecionamento de URL encurtada.' });
-            }
-        }
-
-        // Verificar se o domínio está na lista de suspeitos
-        if (suspiciousDomains.includes(parsedUrl.hostname)) {
-            return res.status(400).json({ message: 'URL suspeita detectada: domínio suspeito.' });
-        }
-
-        // Verificar se a URL contém palavras-chave suspeitas
-        for (const keyword of suspiciousKeywords) {
-            if (parsedUrl.pathname.includes(keyword)) {
-                return res.status(400).json({ message: `URL suspeita detectada: contém palavra-chave suspeita (${keyword}).` });
-            }
-        }
-
-        // Verificar se a URL utiliza HTTPS
-        if (parsedUrl.protocol !== 'https:') {
-            return res.status(400).json({ message: 'URL suspeita detectada: não utiliza HTTPS.' });
-        }
+const checkURL = async (req, res, next) => {
+    let url = req.query.url;
+    if (!url) {
+        return res.status(400).json({ error: 'URL não fornecida.' });
     }
-    next();
-}
+
+    // Adiciona o esquema http:// se estiver ausente
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'http://' + url;
+    }
+
+    try {
+        const urlDomain = new URL(url).hostname;
+        const response = await axios.get(`https://www.virustotal.com/api/v3/domains/${urlDomain}`, {
+            headers: { 'x-apikey': vtApiKey }
+        });
+        const data = response.data;
+        if (data.data.attributes.last_analysis_stats.malicious > 0) {
+            return res.status(200).json({ message: `URL suspeita detectada: redireciona para um domínio suspeito (${urlDomain}).` });
+        }
+        if (!url.startsWith('https')) {
+            return res.status(200).json({ message: 'URL suspeita detectada: não utiliza HTTPS.' });
+        }
+        next();
+    } catch (error) {
+        console.error('Erro ao verificar reputação da URL:', error.message);
+        return res.status(500).json({ error: 'Erro ao verificar a URL.' });
+    }
+};
 
 module.exports = checkURL;

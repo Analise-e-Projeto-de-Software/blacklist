@@ -34,6 +34,34 @@ router.post('/analyze-email', async (req, res) => {
     });
 });
 
+// Endpoint para verificação de URL
+router.get('/check-url', checkURL, (req, res) => {
+    logActivity(`URL verificada: ${req.query.url}`);
+    res.json({ message: 'URL segura.' });
+});
+
+// Endpoint para verificação de notícias
+router.get('/verify-news', async (req, res) => {
+    const { query } = req.query;
+    try {
+        const result = await verifyNews(query);
+        res.json(result);
+    } catch (error) {
+        console.error('Erro ao verificar notícias:', error.message);
+        res.status(500).json({ error: 'Erro ao verificar notícias.' });
+    }
+});
+
+// Endpoint para logs
+router.get('/logs', (req, res) => {
+    db.all('SELECT * FROM logs ORDER BY timestamp DESC', [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+});
+
 async function analyzeEmail(email, header, body, attachments = []) {
     const details = [];
     const suspiciousDomains = ['suspicious.com', 'malicious.org'];
