@@ -43,8 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const response = await fetch(`/verify-news?query=${encodeURIComponent(query)}`);
         const result = await response.json();
-        console.log(result);
-        alert(`Encontrado ${result.totalResults} artigos relacionados.`);
+
+        const newsContainer = document.getElementById('newsContainer');
+        newsContainer.innerHTML = `<h3>Artigos Encontrados (${result.totalResults})</h3>`;
+
+        if (result.articles && result.articles.length > 0) {
+            const articlesList = document.createElement('ul');
+            result.articles.forEach(article => {
+                const articleItem = document.createElement('li');
+                articleItem.innerHTML = `
+                    <h4>${article.title}</h4>
+                    <p><strong>Autor:</strong> ${article.author || 'Desconhecido'}</p>
+                    <p><strong>Fonte:</strong> ${article.source.name}</p>
+                    <p><strong>Publicado em:</strong> ${new Date(article.publishedAt).toLocaleString()}</p>
+                    <p>${article.description}</p>
+                    <a href="${article.url}" target="_blank">Leia mais</a>
+                `;
+                articlesList.appendChild(articleItem);
+            });
+            newsContainer.appendChild(articlesList);
+        } else {
+            newsContainer.innerHTML += '<p>Nenhum artigo encontrado.</p>';
+        }
     });
 
     // Carregar logs de atividades
